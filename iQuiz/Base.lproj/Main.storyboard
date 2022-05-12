@@ -66,7 +66,7 @@
                                             </subviews>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="di6-RV-J44" kind="showDetail" id="zI1-Ra-adG"/>
+                                            <segue destination="di6-RV-J44" kind="presentation" modalPresentationStyle="fullScreen" id="zI1-Ra-adG"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -97,11 +97,11 @@
             <objects>
                 <viewController id="di6-RV-J44" customClass="ViewController" customModule="iQuiz" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="bdS-9P-3yr">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6lL-7w-dZ0">
-                                <rect key="frame" x="314" y="781" width="70" height="31"/>
+                                <rect key="frame" x="314" y="801" width="70" height="31"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Submit"/>
                                 <connections>
