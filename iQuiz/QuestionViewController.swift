@@ -36,11 +36,11 @@ class QuestionViewController: UIViewController {
     }
     
     func changeLabel() {
-        questionLabel.text = data!.q
-        answerOptions[0].setTitle(data!.achoice, for: .normal)
-        answerOptions[1].setTitle(data!.c1, for: .normal)
-        answerOptions[2].setTitle(data!.c2, for: .normal)
-        answerOptions[3].setTitle(data!.c3, for: .normal)
+        questionLabel.text = data!.text
+        for i in 0...data!.answers.count - 1 {
+            answerOptions[i].setTitle(data?.answers[i], for: .normal)
+        }
+
     }
     
     func changeData(_ new: Question) {

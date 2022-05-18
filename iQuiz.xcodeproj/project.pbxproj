@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C26A77428335CFA008BA6D5 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 3C26A77328335CFA008BA6D5 /* Settings.bundle */; };
 		3C63A1D8282CE127006B1468 /* QuestionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C63A1D7282CE127006B1468 /* QuestionViewController.swift */; };
 		3C63A1DA282CE47B006B1468 /* AnswerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C63A1D9282CE47B006B1468 /* AnswerViewController.swift */; };
 		3C63A1DC282CE64C006B1468 /* FinishViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C63A1DB282CE64C006B1468 /* FinishViewController.swift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3C26A77328335CFA008BA6D5 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		3C63A1D7282CE127006B1468 /* QuestionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionViewController.swift; sourceTree = "<group>"; };
 		3C63A1D9282CE47B006B1468 /* AnswerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnswerViewController.swift; sourceTree = "<group>"; };
 		3C63A1DB282CE64C006B1468 /* FinishViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishViewController.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				3CC016B0282A284100000AA0 /* Assets.xcassets */,
 				3CC016B2282A284100000AA0 /* LaunchScreen.storyboard */,
 				3CC016B5282A284100000AA0 /* Info.plist */,
+				3C26A77328335CFA008BA6D5 /* Settings.bundle */,
 			);
 			path = iQuiz;
 			sourceTree = "<group>";
@@ -134,6 +137,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C26A77428335CFA008BA6D5 /* Settings.bundle in Resources */,
 				3CC016B4282A284100000AA0 /* LaunchScreen.storyboard in Resources */,
 				3CC016B1282A284100000AA0 /* Assets.xcassets in Resources */,
 				3CC016AF282A283C00000AA0 /* Main.storyboard in Resources */,

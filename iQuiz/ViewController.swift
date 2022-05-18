@@ -8,37 +8,28 @@
 import UIKit
 
 
-class Subject {
+struct Subject: Codable {
     var title: String
     var descrip: String
-    var image: String
     var questions: [Question] = []
     
-    
-    init(subj: String, desc: String, img: String, question: [Question]?) {
+    init(subj: String, desc: String, question: [Question]?) {
         title = subj
         descrip = desc
-        image = img
-        
         if (question != nil) {
             questions = question!
         }
     }
 }
 
-class Question {
-    var q: String
-    var c1: String
-    var c2: String
-    var c3: String
-    var achoice: String
-    
-    init(question: String, answer: String, option1: String, option2: String, option3: String) {
-        q = question
-        achoice = answer
-        c1 = option1
-        c2 = option2
-        c3 = option3
+struct Question: Codable {
+    var text: String
+    var answer: String
+    var answers: [String]
+    init(text: String, answer: String, answers: [String]) {
+        self.text = text
+        self.answer = answer
+        self.answers = answers
     }
 }
 
@@ -49,17 +40,21 @@ class ViewController: UIViewController {
     var tableDataAndDelegate = TableDataAndDelegate()
     var score = 0
     var curr = 0
-   
+    var urlString = UserDefaults.standard.string(forKey: "quizquestionsurl") ?? "https://tednewardsandbox.site44.com/questions.json"
+
+    
     @IBOutlet weak var SubjectsTableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+
         if (SubjectsTableView != nil) {
             tableDataAndDelegate.vc = self
             SubjectsTableView.delegate = tableDataAndDelegate
             SubjectsTableView.dataSource = tableDataAndDelegate
             SubjectsTableView.rowHeight = 70.0
+            getQuestions()
         } else {
             score = 0;
             buildQuestion()
@@ -67,18 +62,97 @@ class ViewController: UIViewController {
             buildFinish()
             switchViewController(nil, to: question)
         }
-        
     }
     
     @IBAction func SettingsAlert(_ sender: Any) {
-        let alert = UIAlertController(title: "Settings", message: "Settings Go Here", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-        NSLog("The \"OK\" alert occured.")
-        }))
+        let alert = UIAlertController(title: "Settings", message: "iQuiz Settings", preferredStyle: .alert)
+        let confirmQuestions = UIAlertAction(title: "Enter", style: .default) { _ in
+            self.urlString = (alert.textFields?[0].text)!
+            UserDefaults.standard.set(self.urlString, forKey: "quizquestionsurl")
+            self.getQuestions()
+        }
+        let checkQuestions = UIAlertAction(title: "Update Questions", style: .default) { _ in
+            self.getQuestions()
+            self.SubjectsTableView.reloadData()
+        }
+        alert.addTextField { (textField) in
+            textField.placeholder = "Enter new URL to get questions from"
+        }
+        let cancelQuestions = UIAlertAction(title: "Cancel", style: .default) { _ in
+        }
+        alert.addAction(confirmQuestions)
+        alert.addAction(checkQuestions)
+        alert.addAction(cancelQuestions)
+        
         self.present(alert, animated: true, completion: nil)
     }
     
+    fileprivate func getQuestions() {
+        guard let url = URL.init(string: urlString) else {
+            return
+        }
+        let session = URLSession.shared.dataTask(with: url) {data, response, error in
+            if response != nil {
+                if (response! as! HTTPURLResponse).statusCode != 200 {
+                    let archiveURL = URL(fileURLWithPath: NSHomeDirectory() + "/Documents/scores.archive")
+                    let readScores = NSArray(contentsOf: archiveURL)
+                    TableDataAndDelegate.data = readScores as! [Subject]
+                } else {
+                    do {
+                        TableDataAndDelegate.data = []
+                        let questions =  try JSONSerialization.jsonObject(with: data!) as! NSArray
+                        DispatchQueue.main.async {
+                            for i in 0..<questions.count {
+                                let object = questions[i] as! NSDictionary
+                                let objectQuestions = object["questions"]! as! NSArray
+                                var QuestionArray : [Question] = []
+                                for i in 0..<objectQuestions.count {
+                                    let oneQuestion = objectQuestions[i] as! NSDictionary
+                                    QuestionArray.append(
+                                        Question(
+                                            text: oneQuestion["text"] as! String,
+                                            answer: oneQuestion["answer"] as! String,
+                                            answers: oneQuestion["answers"] as! [String]
+                                        )
+                                    )
+                                }
+                                TableDataAndDelegate.data.append(Subject(
+                                    subj: object["title"]! as! String,
+                                    desc: object["desc"]! as! String,
+                                    question: QuestionArray
+                                ))
+                            }
+                            self.SubjectsTableView.reloadData()
+                            print(TableDataAndDelegate.data)
+                            print(self.urlString)
+                            
+                            // UNSURE IF DATA ACTUALLY SAVES
+                            let archivePath = NSHomeDirectory() + "/Documents/quizzes.archive"
+                            print(archivePath)
+                            let quizArchive = TableDataAndDelegate.data as NSArray
+                            print(quizArchive)
+                            quizArchive.write(toFile: archivePath, atomically: true)
+                        }
+                    } catch {
+                        DispatchQueue.main.async {
+                            print("something went wrong")
+                            self.showError()
+                        }
+                    }
+                }
+            }
+        }
+        session.resume()
+    }
    
+    fileprivate func showError() {
+        let alertController = UIAlertController(title: "Uh-Oh! Something went wrong", message: "Please check your url and make sure your network is available", preferredStyle: .alert)
+        let confirmAction = UIAlertAction(title: "Enter", style: .default) { (_) in
+        }
+        alertController.addAction(confirmAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
     @IBOutlet weak var SubmitButton: UIButton!
     @IBAction func nextSwitch(_ sender: Any) {
         buildQuestion()
@@ -89,19 +163,18 @@ class ViewController: UIViewController {
         UIView.setAnimationDuration(0.4)
         UIView.setAnimationCurve(.easeInOut)
         
-        
         if question != nil &&
             question!.view.superview != nil {
             UIView.setAnimationTransition(.flipFromRight, for: view, cache: true)
             answer!.view.frame = view.frame
             SubmitButton.setTitle("Next", for: .normal)
             switchViewController(question, to: answer)
-            if (question?.selectedAnswer?.titleLabel?.text == TableDataAndDelegate.selected![curr - 1].achoice) {
+            if (question?.selectedAnswer?.titleLabel?.text == TableDataAndDelegate.selected![curr - 1].answers[Int(TableDataAndDelegate.selected![curr - 1].answer)! - 1]) {
                 score += 1
                 NSLog("score");
                 answer!.changeData("Correct!")
             } else {
-                answer!.changeData("Incorrect. The correct answer is \(TableDataAndDelegate.selected![curr - 1].achoice)")
+                answer!.changeData("Incorrect. \n The correct answer is \(TableDataAndDelegate.selected![curr - 1].answers[Int(TableDataAndDelegate.selected![curr - 1].answer)! - 1])")
             }
         }
         else {
@@ -163,18 +236,10 @@ class ViewController: UIViewController {
 }
 
 
-
-
 class TableDataAndDelegate : NSObject, UITableViewDataSource, UITableViewDelegate {
     weak var vc : ViewController?
     static var selected: [Question]? = nil
-
-    static let data: [Subject] = [
-        Subject(subj: "Mathematics", desc: "Test your math skills!", img: "brain", question: [Question(question: "Math Test", answer: "One", option1: "Two", option2: "Three", option3: "Four")]),
-        Subject(subj: "Marvel Super Heroes", desc: "Test your Marvel Super Hero Knowledge!", img: "person", question: [Question(question: "Marvel Test", answer: "One", option1: "Two", option2: "Three", option3: "Four")]),
-        Subject(subj: "Science", desc: "Test your Science skills", img: "magnifyingglass", question: [Question(question: "Science Test", answer: "One", option1: "Two", option2: "Three", option3: "Four"), Question(question: "SECOND TEST", answer: "TWO", option1: "THREE", option2: "ONE", option3: "FOUR")])
-    ]
-
+    static var data: [Subject] = []
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return TableDataAndDelegate.data.count
@@ -182,22 +247,16 @@ class TableDataAndDelegate : NSObject, UITableViewDataSource, UITableViewDelegat
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         print("indexPath.item = \(indexPath.item)", "indexPath.row = \(indexPath.row)")
-        
+        //BUG HERE
         let cell : UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "subjects", for: indexPath)
         cell.textLabel?.text = TableDataAndDelegate.data[indexPath.row].title
         cell.detailTextLabel?.text = TableDataAndDelegate.data[indexPath.row].descrip
-        cell.imageView?.image = UIImage(systemName: "\(TableDataAndDelegate.data[indexPath.row].image)")
-        
+       
         return cell
     }
     
     func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-//        let alert = UIAlertController(title: "Selected!", message: "You selected \(TableDataAndDelegate.data[indexPath.row].title)!", preferredStyle: .alert)
-//        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: nil))
-//        vc!.present(alert, animated: true, completion: nil)
-        
         TableDataAndDelegate.selected = TableDataAndDelegate.data[indexPath.row].questions
-        
         return indexPath
     }
 
